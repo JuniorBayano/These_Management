@@ -1,5 +1,5 @@
 package com.example.api_management.Entities;
 
 public enum Role {
-    Student,Jury,Administrator;
+    Student,Jury,Administrator,Encadreur;
 }
