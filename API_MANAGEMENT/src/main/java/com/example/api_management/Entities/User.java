@@ -1,5 +1,6 @@
 package com.example.api_management.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String matricule;
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "Numero_Groupe")
     private Groupe groupe;
     @Enumerated(EnumType.STRING)

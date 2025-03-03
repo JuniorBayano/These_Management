@@ -3,17 +3,19 @@ package com.example.api_management.request;
 import jakarta.validation.constraints.NotNull;
 
 public record UserRequest(
-        @NotNull(message = "Le nom est requis")
-        String name,
-        @NotNull(message = "Le mot de passe est requis")
+        @NotNull()
+        String username,
+        @NotNull()
         String password,
-        @NotNull(message = "L'email est requis")
+        @NotNull()
         String email,
-        @NotNull(message = "Le matricule est requis")
+        @NotNull()
         String matricule,
-        @NotNull(message = "Le matricule est requis")
-        Integer numerogroupe,
-        @NotNull(message = "Le role est requis")
+        @NotNull()
+        Integer groupe,
+        @NotNull()
         String role
 ) {
 }
+
+
