@@ -16,13 +16,13 @@ import java.util.List;
 @Data
 public class Groupe {
     @Id
-    @Column(name = "Numero_Groupe")
+    @Column(name = "Numero_Groupe",unique = true)
     private Integer numeroGroupe;
     @Column(nullable = false)
     private String encadreur;
     @Column(nullable = false)
     private String theme;
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe",cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<User> students;
     @OneToOne

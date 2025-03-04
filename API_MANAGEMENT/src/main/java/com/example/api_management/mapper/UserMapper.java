@@ -43,7 +43,6 @@ public class UserMapper {
         if (request.email() == null || request.email().isEmpty()) {
             missingFields.add("Le champ 'email' est requis");
         } else {
-            // Validation de l'email
             if (!isValidEmail(request.email())) {
                 missingFields.add("L'email n'est pas valide");
             }
@@ -66,7 +65,6 @@ public class UserMapper {
         if (requestRegisterRequest.email() == null || requestRegisterRequest.email().isEmpty()) {
             missingFields.add("Le champ 'email' est requis");
         } else {
-            // Validation de l'email
             if (!isValidEmail(requestRegisterRequest.email())) {
                 missingFields.add("L'email n'est pas valide");
             }
@@ -77,7 +75,6 @@ public class UserMapper {
         return missingFields;
     }
 
-    // Méthode de validation de l'email avec regex
     private boolean isValidEmail(String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);
         Matcher matcher = pattern.matcher(email);

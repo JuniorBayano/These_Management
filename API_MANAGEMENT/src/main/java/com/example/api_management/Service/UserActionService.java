@@ -2,6 +2,8 @@ package com.example.api_management.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.api_management.Entities.Groupe;
+import com.example.api_management.Entities.Role;
 import com.example.api_management.Entities.User;
 import com.example.api_management.Repositories.UserRepository;
 import com.example.api_management.mapper.UserMapper;
@@ -32,19 +34,26 @@ public class UserActionService {
     private long jwtExpiration;
 
     public ResponseEntity<?> registerUser(UserRequest userRequest) {
-        // Vérifier les champs manquants
         List<String> missingFields = userMapper.validateRequestRegister(userRequest);
         if (!missingFields.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("errors", missingFields));
         }
 
-        // Vérifier si l'email existe déjà
         if (userRepository.findByEmail(userRequest.email()) != null) {
             return ResponseEntity.badRequest().body(Map.of("error", "User already exists, change email"));
         }
 
-        // Mapper l'utilisateur
         User user = userMapper.toUser(userRequest);
+
+        if (user.getRole() == Role.Student) {
+            Groupe groupe = user.getGroupe();
+
+            int studentCount = userRepository.countStudentsInGroup(groupe);
+
+            if (studentCount >= 2) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Le groupe est déjà complet (2 étudiants maximum)"));
+            }
+        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

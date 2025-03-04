@@ -1,42 +1,26 @@
 package com.example.api_management.Entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name="salles")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Salle {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false,unique = true)
+    private String nomSalle;
     @Column(nullable = false)
-    private Integer numeroSalle;
-    @Column(nullable = false)
-    @OneToMany(mappedBy = "salle")
+    @OneToMany(mappedBy = "salle",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Soutenance> soutenanceList;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getNumeroSalle() {
-        return numeroSalle;
-    }
-
-    public void setNumeroSalle(Integer numeroSalle) {
-        this.numeroSalle = numeroSalle;
-    }
-
-    public List<Soutenance> getSoutenanceList() {
-        return soutenanceList;
-    }
-
-    public void setSoutenanceList(List<Soutenance> soutenanceList) {
-        this.soutenanceList = soutenanceList;
-    }
+    @Column(nullable = false)
+    private Integer nbrePlaces;
 }
