@@ -9,9 +9,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class UserMapper {
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
     public User toUser(UserRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("La requête est nulle");
@@ -38,6 +42,11 @@ public class UserMapper {
         }
         if (request.email() == null || request.email().isEmpty()) {
             missingFields.add("Le champ 'email' est requis");
+        } else {
+            // Validation de l'email
+            if (!isValidEmail(request.email())) {
+                missingFields.add("L'email n'est pas valide");
+            }
         }
         if (request.matricule() == null || request.matricule().isEmpty()) {
             missingFields.add("Le champ 'matricule' est requis");
@@ -56,10 +65,22 @@ public class UserMapper {
         List<String> missingFields = new ArrayList<>();
         if (requestRegisterRequest.email() == null || requestRegisterRequest.email().isEmpty()) {
             missingFields.add("Le champ 'email' est requis");
+        } else {
+            // Validation de l'email
+            if (!isValidEmail(requestRegisterRequest.email())) {
+                missingFields.add("L'email n'est pas valide");
+            }
         }
         if (requestRegisterRequest.password() == null || requestRegisterRequest.password().isEmpty()) {
             missingFields.add("Le champ 'password' est requis");
         }
         return missingFields;
+    }
+
+    // Méthode de validation de l'email avec regex
+    private boolean isValidEmail(String email) {
+        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }
