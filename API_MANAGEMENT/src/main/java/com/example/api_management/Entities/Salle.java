@@ -1,5 +1,7 @@
 package com.example.api_management.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +22,7 @@ public class Salle {
     private String nomSalle;
     @Column(nullable = false)
     @OneToMany(mappedBy = "salle",cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Soutenance> soutenanceList;
     @Column(nullable = false)
     private Integer nbrePlaces;

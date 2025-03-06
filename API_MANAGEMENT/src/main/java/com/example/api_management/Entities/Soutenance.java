@@ -1,5 +1,6 @@
 package com.example.api_management.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,20 +38,26 @@ public class Soutenance {
     @Enumerated(EnumType.STRING)
     private EtatSoutenance etat;
 
-    @OneToMany(mappedBy = "role")
+    @OneToMany
+    @JoinTable(
+            name = "soutenance_jury",
+            joinColumns = @JoinColumn(name = "soutenance_id"),
+            inverseJoinColumns = @JoinColumn(name = "jury_id")
+    )
     private List<User> jury;
 
+
     @OneToOne
-    @JoinColumn(name = "Numero_Groupe")
+    @JoinColumn(name = "Numero_Groupe",unique = true)
     private Groupe groupe;
 
     @ManyToOne
     @JoinColumn(name = "Salle_Numero")
+    @JsonBackReference
     private Salle salle;
 
-    @OneToOne(mappedBy = "soutenance", cascade = CascadeType.ALL)
-    private Note note;
-
+    @OneToMany(mappedBy = "soutenance")
+    private List<Note> notes;
     @PrePersist
     @PreUpdate
     private void calculateDateFin() {

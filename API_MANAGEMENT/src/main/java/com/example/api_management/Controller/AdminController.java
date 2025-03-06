@@ -1,23 +1,32 @@
 package com.example.api_management.Controller;
 
+import com.example.api_management.Repositories.SoutenanceRepository;
 import com.example.api_management.Repositories.UserRepository;
 import com.example.api_management.Service.AdminActionService;
+import com.example.api_management.Service.PdfService;
 import com.example.api_management.mapper.JuryMapper;
-import com.example.api_management.request.GroupeRequest;
-import com.example.api_management.request.JuryRequest;
-import com.example.api_management.request.SalleRequest;
-import com.example.api_management.request.UpdateGroupeRequest;
+import com.example.api_management.request.*;
+import jakarta.validation.Valid;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
     private final AdminActionService adminActionService;
+    private final PdfService pdfService;
+    private final SoutenanceRepository soutenanceRepository;
 
-    public AdminController(AdminActionService adminActionService, UserRepository userRepository, JuryMapper juryMapper) {
+    public AdminController(AdminActionService adminActionService, PdfService pdfService,SoutenanceRepository soutenanceRepository) {
         this.adminActionService = adminActionService;
+        this.pdfService = pdfService;
+        this.soutenanceRepository = soutenanceRepository;
     }
     @PostMapping("/addJury")
     public ResponseEntity<?> addJury(@RequestBody JuryRequest juryRequest) {
@@ -63,4 +72,22 @@ public class AdminController {
     public ResponseEntity<?> addSalle(@RequestBody SalleRequest salleRequest) {
         return adminActionService.AddSalle(salleRequest);
     }
+    @PostMapping("/programSoutenance")
+    public ResponseEntity<?> programSoutenance(@Valid @RequestBody SoutenanceRequest soutenanceRequest) {
+        return adminActionService.submitSoutenance(soutenanceRequest);
+    }
+    @GetMapping("/exportSoutenancesPdf")
+    public ResponseEntity<ByteArrayResource> exportSoutenancesPdf() {
+        return pdfService.generateSoutenancesPdf();
+    }
+    @GetMapping("/etat")
+    public List<?> getSoutenancesEtat() {
+        return soutenanceRepository.findAll().stream()
+                .map(s -> Map.of(
+                        "numeroGroupe", s.getGroupe().getNumeroGroupe(),
+                        "etat", s.getEtat()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

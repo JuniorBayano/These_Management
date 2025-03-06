@@ -1,26 +1,20 @@
 package com.example.api_management.Service;
 
-import com.example.api_management.Entities.Groupe;
-import com.example.api_management.Entities.Role;
-import com.example.api_management.Entities.Salle;
-import com.example.api_management.Entities.User;
+import com.example.api_management.Entities.*;
 import com.example.api_management.Repositories.GroupeRepository;
 import com.example.api_management.Repositories.SalleRepository;
+import com.example.api_management.Repositories.SoutenanceRepository;
 import com.example.api_management.Repositories.UserRepository;
 import com.example.api_management.DTo.JuryDTO;
-import com.example.api_management.mapper.GroupeMapper;
-import com.example.api_management.mapper.JuryMapper;
-import com.example.api_management.mapper.SalleMapper;
-import com.example.api_management.mapper.UpdateGroupeMapper;
-import com.example.api_management.request.GroupeRequest;
-import com.example.api_management.request.JuryRequest;
-import com.example.api_management.request.SalleRequest;
-import com.example.api_management.request.UpdateGroupeRequest;
+import com.example.api_management.mapper.*;
+import com.example.api_management.request.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +31,8 @@ public class AdminActionService {
     private final GroupeMapper groupeMapper;
     private final UpdateGroupeMapper updateGroupeMapper;
     private final SalleMapper salleMapper;
+    private final SoutenanceRepository soutenanceRepository;
+    private final SoutenanceMapper soutenanceMapper;
 
     public ResponseEntity<?> AddJury(JuryRequest juryRequest) {
         List<String> errors = juryMapper.validateRequestAddUser(juryRequest);
@@ -144,5 +140,37 @@ public class AdminActionService {
         salleRepository.save(salle);
         return ResponseEntity.ok("Salle ajoute avec succes !");
     }
+
+    public ResponseEntity<?> submitSoutenance(SoutenanceRequest soutenanceRequest) {
+        try {
+            Soutenance soutenance = soutenanceMapper.toSoutenance(soutenanceRequest);
+            System.out.println("Jurys affectés : " + soutenance.getJury()); // ✅ Debugging
+
+            Soutenance savedSoutenance = soutenanceRepository.save(soutenance);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Soutenance soumise avec succès",
+                    "soutenance", savedSoutenance
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("errors", e.getMessage()));
+        }
+    }
+    @Scheduled(fixedRate = 60000)
+    public void updateSoutenanceStatus() {
+        List<Soutenance> soutenances = soutenanceRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Soutenance s : soutenances) {
+            if (now.isBefore(s.getHeureDepart())) {
+                s.setEtat(EtatSoutenance.PROGRAMMEE);
+            } else if (!now.isBefore(s.getHeureDepart()) && now.isBefore(s.getDateFin())) {
+                s.setEtat(EtatSoutenance.EN_COURS);
+            } else {
+                s.setEtat(EtatSoutenance.TERMINEE);
+            }
+            soutenanceRepository.save(s);
+        }
+    }
+
 
 }
